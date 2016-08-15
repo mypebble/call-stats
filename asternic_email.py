@@ -116,6 +116,22 @@ The Call Stats Robot
         # Roll to end of day
         self.end = arrow.get().replace(hour=23, minute=59, second=59)
 
+    def roll_to_weekday(self, date, weekday):
+        while date.weekday() != weekday:
+            if date.weekday() > weekday:
+                date = date.replace(days=-1)
+            else:
+                date = date.replace(days=1)
+        return date
+
+    def set_week(self, day_in_week=None):
+        # Set to start of day
+        self.start = self.roll_to_weekday(
+            arrow.get(day_in_week).replace(hour=0, minute=0, second=0), 0)
+        # Roll to end of day
+        self.end = self.roll_to_weekday(
+            arrow.get(day_in_week).replace(hour=23, minute=59, second=59), 6)
+
     def set_month(self):
         # Set to start of month
         self.start = arrow.get().replace(day=1, hour=0, minute=0, second=0)
@@ -129,6 +145,7 @@ The Call Stats Robot
 
     def get_callstats(self, tab):
         print '>>> Requesting {} stats'.format(tab)
+        print '>>> Report for period {} - {}'.format(self.start, self.end)
 
         # Asternic requires a post
         page = self.session.post(
@@ -158,21 +175,35 @@ The Call Stats Robot
         for extension, data in self.stats.items():
             # Asternic produces a <tr> straight after what we want labeled
             # with an ID
-            wrong_row = soup.select("#{}".format(extension))[0]
-            # So we need to get the row just before it
-            row = wrong_row.previous_sibling.previous_sibling
+            try:
+                wrong_row = soup.select("#{}".format(extension))[0]
+                # So we need to get the row just before it
+                row = wrong_row.previous_sibling.previous_sibling
 
-            items = row.find_all('td')
-            # Now we have the partial call stats for this person
-            # so we fill the array
-            self.stats[extension][tab] = {
-                'total': items[1].string,
-                'completed': items[2].string,
-                'missed': items[3].string,
-                'missedPercentage': items[4].string,
-                'duration': items[5].string,
-                'durationPercentage': items[6].string,
-                'avgDuration': items[7].string,
-                'totalRingTime': items[8].string,
-                'avgRingTime': items[9].string
-            }
+                items = row.find_all('td')
+                # Now we have the partial call stats for this person
+                # so we fill the array
+                self.stats[extension][tab] = {
+                    'total': items[1].string,
+                    'completed': items[2].string,
+                    'missed': items[3].string,
+                    'missedPercentage': items[4].string,
+                    'duration': items[5].string,
+                    'durationPercentage': items[6].string,
+                    'avgDuration': items[7].string,
+                    'totalRingTime': items[8].string,
+                    'avgRingTime': items[9].string
+                }
+            except IndexError:
+                print '>>>> {} did no calls during this period'.format(data['name'])
+                self.stats[extension][tab] = {
+                    'total': 0,
+                    'completed': 0,
+                    'missed': 0,
+                    'missedPercentage': 'null',
+                    'duration': '0s',
+                    'durationPercentage': 'null',
+                    'avgDuration': '0s',
+                    'totalRingTime': 'null',
+                    'avgRingTime': 'null'
+                }
