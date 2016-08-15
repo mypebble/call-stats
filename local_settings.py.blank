@@ -7,6 +7,10 @@ EXTENSIONS = {
     'SIP/999': {
         'name': 'Johnny',
         'email': 'johnny@example.com'
+    },
+    'SIP/829': {
+        'name': 'Steve',
+        'email': ['steve@example.com', 'theboss@example.com']
     }
 }
 

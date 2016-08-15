@@ -104,11 +104,15 @@ The Call Stats Robot
         msg = MIMEMultipart('alternative')
         msg['Subject'] = 'Your Call Stats'
         msg['From'] = local_settings.SMTP_FROM
-        msg['To'] = data['email']
-        msg.attach(html_part)
-        self.smtp.sendmail(
-            local_settings.SMTP_FROM,
-            data['email'], msg.as_string())
+
+        if isinstance(data['email'], basestring):
+            data['email'] = [data['email']]
+        for email in data['email']:
+            msg['To'] = email
+            msg.attach(html_part)
+            self.smtp.sendmail(
+                local_settings.SMTP_FROM,
+                email, msg.as_string())
 
     def generate_emails(self, tagline):
         for extension, data in self.stats.items():
