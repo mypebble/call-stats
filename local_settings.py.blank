@@ -1,6 +1,7 @@
 PBX_URL = 'http://pbx.something.net'
 PBX_USERNAME = 'root'
 PBX_PASSWORD = 'root'
+PBX_LOGIN_PAGE = False
 
 EXTENSIONS = {
     'SIP/999': {

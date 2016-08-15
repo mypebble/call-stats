@@ -23,6 +23,15 @@ class CallStats(object):
     def __init__(self, extensions):
         self.stats = extensions
         self.session = requests.Session()
+        if local_settings.PBX_LOGIN_PAGE:
+            print ">> Login to PBX..."
+            self.session.post(
+                "{}/admin/config.php".format(
+                    local_settings.PBX_URL),
+                data={
+                    'username': local_settings.PBX_USERNAME,
+                    'password': local_settings.PBX_PASSWORD
+                })
 
     def connect_smtp(self, server, username, password):
         print ">>> Connecting to SMTP"

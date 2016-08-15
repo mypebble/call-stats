@@ -1,0 +1,4 @@
+bs4==0.0.1
+CommonMark==0.6.4
+requests==2.10.0
+arrow==0.6.0
